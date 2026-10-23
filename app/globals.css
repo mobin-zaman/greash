@@ -1,26 +1,255 @@
 @import "tailwindcss";
 
+/* ============ Greash design tokens ============ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0b0907;
+  --bg-2: #100d0a;
+  --panel: #16120d;
+  --panel-2: #1c1711;
+  --ink: #f4eddc;
+  --dim: #a89d89;
+  --faint: #6f6553;
+  --acid: #d8f04a;
+  --ember: #ff5722;
+  --line: rgba(244, 237, 220, 0.12);
+
+  /* Emil custom easings */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel-2);
+  --color-ink: var(--ink);
+  --color-dim: var(--dim);
+  --color-acid: var(--acid);
+  --color-ember: var(--ember);
+  --font-display: var(--font-anton);
+  --font-body: var(--font-grotesk);
+  --font-input: var(--font-spacemono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--acid);
+  color: #0b0907;
+}
+
+/* ============ Grain overlay ============ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============ Marquee ============ */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-speed, 30s) linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ============ Equalizer ============ */
+.eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+}
+.eq span {
+  width: 3px;
+  border-radius: 99px;
+  background: var(--acid);
+  animation: eq 0.9s ease-in-out infinite alternate;
+}
+.eq-np span { background: currentColor; }
+.eq-np span:nth-child(1) { animation-delay: 0s; }
+.eq-np span:nth-child(2) { animation-delay: 0.22s; }
+.eq-np span:nth-child(3) { animation-delay: 0.4s; }
+.eq-np span:nth-child(4) { animation-delay: 0.15s; }
+@keyframes eq {
+  from { height: 20%; }
+  to   { height: 100%; }
+}
+
+/* ============ Reveal on scroll (IO-driven) ============ */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============ Rotating hero word ============ */
+.rotator {
+  position: relative;
+  display: inline-grid;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.rotator > span {
+  grid-area: 1 / 1;
+  animation: rotateWord 7s var(--ease-in-out) infinite;
+  opacity: 0;
+}
+.rotator > span:nth-child(1) { animation-delay: 0s; }
+.rotator > span:nth-child(2) { animation-delay: 1.75s; }
+.rotator > span:nth-child(3) { animation-delay: 3.5s; }
+.rotator > span:nth-child(4) { animation-delay: 5.25s; }
+@keyframes rotateWord {
+  0%   { opacity: 0; transform: translateY(110%); }
+  5%   { opacity: 1; transform: translateY(0); }
+  22%  { opacity: 1; transform: translateY(0); }
+  27%  { opacity: 0; transform: translateY(-110%); }
+  100% { opacity: 0; transform: translateY(-110%); }
+}
+
+/* ============ Big scroll type ============ */
+.slide-x {
+  animation: slideX var(--slide-ms, 28s) linear infinite;
+  will-change: transform;
+}
+@keyframes slideX {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ============ Buttons ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    background 200ms var(--ease-out);
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--acid); color: #0b0907; }
+.btn-primary:hover {
+  box-shadow: 0 0 0 2px rgba(216, 240, 74, 0.5), 0 12px 40px -8px rgba(216, 240, 74, 0.35);
+}
+.btn-ghost { border: 1px solid var(--line); color: var(--ink); }
+.btn-ghost:hover { background: rgba(244, 237, 220, 0.06); }
+.btn-ember { background: var(--ember); color: #0b0907; }
+.btn-ember:hover {
+  box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.45), 0 12px 40px -8px rgba(255, 87, 34, 0.35);
+}
+
+/* ============ Featured cards ============ */
+.card-tilt { transform-style: preserve-3d; will-change: transform; }
+.card-tilt .lift { transform: translateZ(26px); }
+.cover-zoom img { transition: transform 700ms var(--ease-out); }
+.cover-zoom:hover img { transform: scale(1.07); }
+.series-card {
+  transition:
+    transform 260ms var(--ease-out),
+    box-shadow 260ms var(--ease-out);
+}
+.series-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.6);
+}
+
+/* ============ Genre rows ============ */
+.genre-row {
+  transition:
+    color 180ms var(--ease-out),
+    background 180ms var(--ease-out),
+    padding 180ms var(--ease-out);
+  -webkit-text-stroke: 1.5px var(--faint);
+  color: transparent;
+}
+.genre-row:hover {
+  color: var(--bg);
+  background: var(--acid);
+  -webkit-text-stroke: 0px;
+  padding-inline: 20px;
+}
+
+/* ============ Links ============ */
+.uline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 300ms var(--ease-out);
+}
+.uline:hover { background-size: 100% 1px; }
+
+/* ============ Player ============ */
+.player-progress {
+  transform-origin: left;
+  animation: progress var(--progress-sec, 28s) linear infinite;
+}
+@keyframes progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* breathing glow for CTA orb */
+.breathe { animation: breathe 4.5s ease-in-out infinite; }
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50% { transform: scale(1.08); opacity: 0.95; }
+}
+
+/* scroll cue */
+.cue-dot { animation: cueDrop 1.8s var(--ease-out) infinite; }
+@keyframes cueDrop {
+  0%   { transform: translateY(0); opacity: 0; }
+  30%  { opacity: 1; }
+  75%  { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+/* ============ Reduced motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .slide-x,
+  .eq span,
+  .rotator > span,
+  .breathe,
+  .cue-dot,
+  .player-progress {
+    animation-duration: 0.001s;
+    animation-iteration-count: 1;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .series-card:hover { transform: none; }
 }
