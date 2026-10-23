@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function Icon({ playing }: { playing: boolean }) {
   return playing ? (
@@ -15,63 +15,80 @@ function Icon({ playing }: { playing: boolean }) {
   );
 }
 
-/** Fake audio player: play/pause toggles progress + equalizer running state. */
+function fmt(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+
+/** Real audio player: plays /tracks/t1.mp3, live progress + equalizer. */
 export default function Player() {
-  const [playing, setPlaying] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [t, setT] = useState(0);
+  const dur = 44;
+
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    const onTime = () => setT(a.currentTime);
+    const onEnd = () => setPlaying(false);
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("ended", onEnd);
+    return () => {
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("ended", onEnd);
+    };
+  }, []);
+
+  const onToggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing) {
+      a.pause();
+      setPlaying(false);
+    } else {
+      void a.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
+  };
+
+  const pct = dur ? (t / dur) * 100 : 0;
 
   return (
     <div className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-5 shadow-[0_40px_80px_-40px_rgba(0,0,0,0.8)] md:p-6">
+      <audio ref={audioRef} src="/tracks/t1.mp3" preload="metadata" />
+
       {/* now-playing header */}
       <div className="flex items-center gap-4">
-        <div
-          className="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl"
-          style={{
-            background:
-              "radial-gradient(120% 120% at 30% 20%, #40422a 0%, #1a1c0e 45%, #0d0c08 100%)",
-          }}
-          aria-hidden="true"
-        >
-          <div className="absolute inset-0 rounded-xl border border-white/10" />
-          <div className="absolute inset-[7px] rounded-full border border-white/15" />
-          <div className="absolute inset-[16px] rounded-full border border-white/10" />
-          <span className="relative text-[var(--acid)]">
-            {playing ? (
-              <span className="eq block h-4">
-                <span />
-                <span />
-                <span />
-              </span>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" opacity="0.9">
-                <path d="M4 2l10 6-10 6V2z" />
-              </svg>
-            )}
-          </span>
-        </div>
-
+        <img
+          src="/covers/s1-static-shores.jpg"
+          alt="Static Shores cover"
+          className="h-14 w-14 shrink-0 rounded-xl object-cover"
+          loading="lazy"
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-lg leading-none tracking-wide">
             STATIC SHORES <span className="text-[var(--ember)]">— EP 12</span>
           </p>
           <p className="mt-1.5 truncate font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--dim)]">
-            S3 · The signal on Ives Road · 28:41
+            S3 · The signal on Ives Road · 0:44
           </p>
         </div>
+        <span className={`eq ${playing ? "" : "eq-paused"} hidden h-4 text-[var(--acid)] sm:block`} aria-hidden="true">
+          <span /><span /><span /><span />
+        </span>
       </div>
 
       {/* progress */}
-      <div
-        className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/10"
-        role="presentation"
-      >
+      <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
         <div
-          className="player-progress h-full w-full rounded-full bg-[var(--acid)]"
-          style={{ ["--progress-sec" as string]: "132s", animationPlayState: playing ? "running" : "paused" }}
+          className="h-full rounded-full bg-[var(--acid)]"
+          style={{ width: `${pct}%`, transition: "width 300ms linear" }}
         />
       </div>
-      <div className="mt-2 flex justify-between font-mono text-[10px] tracking-widest text-[var(--faint)]" aria-hidden="true">
-        <span>14:32</span>
-        <span>28:41</span>
+      <div className="mt-2 flex justify-between font-mono text-[10px] tracking-widest text-[var(--faint)]">
+        <span>{fmt(t)}</span>
+        <span>{fmt(dur)}</span>
       </div>
 
       {/* controls */}
@@ -79,7 +96,8 @@ export default function Player() {
         <div className="flex items-center gap-5">
           <button
             aria-label="Back 15 seconds"
-            className="btn skip-btn text-[var(--dim)]"
+            onClick={() => { const a = audioRef.current; if (a) a.currentTime = Math.max(0, a.currentTime - 15); }}
+            className="btn text-[var(--dim)]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5V2L7 5.5 12 9V6a6 6 0 11-6 6" />
@@ -87,14 +105,15 @@ export default function Player() {
           </button>
           <button
             aria-label={playing ? "Pause" : "Play"}
-            onClick={() => setPlaying((p) => !p)}
+            onClick={onToggle}
             className="btn flex h-12 w-12 items-center justify-center rounded-full bg-[var(--acid)] text-[#0b0907]"
           >
             <Icon playing={playing} />
           </button>
           <button
             aria-label="Forward 15 seconds"
-            className="btn skip-btn text-[var(--dim)]"
+            onClick={() => { const a = audioRef.current; if (a) a.currentTime = Math.min(dur, a.currentTime + 15); }}
+            className="btn text-[var(--dim)]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5V2l5 3.5L12 9V6a6 6 0 106 6" />
@@ -103,14 +122,8 @@ export default function Player() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span
-            className={`eq ${playing ? "" : "eq-paused"} h-4 text-[var(--acid)]`}
-            aria-hidden="true"
-          >
-            <span />
-            <span />
-            <span />
-            <span />
+          <span className={`eq ${playing ? "" : "eq-paused"} h-4 text-[var(--acid)] sm:hidden`} aria-hidden="true">
+            <span /><span /><span /><span />
           </span>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--dim)] sm:block">
             {playing ? "Playing" : "Paused"}

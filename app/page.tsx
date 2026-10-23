@@ -4,6 +4,7 @@ import CountUp from "@/components/CountUp";
 import Player from "@/components/Player";
 import Reveal from "@/components/Reveal";
 import TiltCard from "@/components/TiltCard";
+import Tracks, { type Track } from "@/components/Tracks";
 
 /* ================================================================
    Data
@@ -20,6 +21,7 @@ const SERIES = [
     bg: "linear-gradient(165deg, #2c1b40 0%, #171019 52%, #0b0907 100%)",
     glow: "rgba(139, 92, 246, 0.5)",
     glowAt: "72% 18%",
+    image: "/covers/s1-static-shores.jpg",
     letter: "S",
     glyph: "radio",
   },
@@ -34,6 +36,7 @@ const SERIES = [
     bg: "linear-gradient(165deg, #0e3a52 0%, #0a1620 55%, #0b0907 100%)",
     glow: "rgba(56, 189, 248, 0.45)",
     glowAt: "30% 12%",
+    image: "/covers/s2-neon-requiem.jpg",
     letter: "N",
     glyph: "moon",
   },
@@ -48,6 +51,7 @@ const SERIES = [
     bg: "linear-gradient(165deg, #6b2b12 0%, #221110 55%, #0b0907 100%)",
     glow: "rgba(255, 87, 34, 0.45)",
     glowAt: "68% 22%",
+    image: "/covers/s3-cadence.jpg",
     letter: "C",
     glyph: "heart",
   },
@@ -62,6 +66,7 @@ const SERIES = [
     bg: "linear-gradient(165deg, #16324b 0%, #0c141d 55%, #0b0907 100%)",
     glow: "rgba(94, 234, 212, 0.35)",
     glowAt: "50% 10%",
+    image: "/covers/s4-void-archive.jpg",
     letter: "V",
     glyph: "spiral",
   },
@@ -76,6 +81,7 @@ const SERIES = [
     bg: "linear-gradient(165deg, #57390a 0%, #1c1509 55%, #0b0907 100%)",
     glow: "rgba(216, 240, 74, 0.35)",
     glowAt: "26% 24%",
+    image: "/covers/s5-last-call.jpg",
     letter: "L",
     glyph: "bolt",
   },
@@ -90,6 +96,7 @@ const SERIES = [
     bg: "linear-gradient(165deg, #571414 0%, #1c0b0b 55%, #0b0907 100%)",
     glow: "rgba(255, 131, 87, 0.4)",
     glowAt: "62% 16%",
+    image: "/covers/s6-embers-ash.jpg",
     letter: "E",
     glyph: "flame",
   },
@@ -140,6 +147,63 @@ const MARQUEE = [
   "Weekly episode drops",
   "120K+ stories",
   "Ad-free listening",
+];
+
+const TRACKS: Track[] = [
+  {
+    id: "t1",
+    src: "/tracks/t1.mp3",
+    cover: "/covers/s1-static-shores.jpg",
+    series: "Static Shores",
+    ep: "EP 12 — The Signal on Ives Road",
+    genre: "Horror · Cyber",
+    dur: "0:44",
+  },
+  {
+    id: "t2",
+    src: "/tracks/t2.mp3",
+    cover: "/covers/s2-neon-requiem.jpg",
+    series: "Neon Requiem",
+    ep: "EP 4 — A Rain Without End",
+    genre: "Noir",
+    dur: "0:44",
+  },
+  {
+    id: "t3",
+    src: "/tracks/t3.mp3",
+    cover: "/covers/s3-cadence.jpg",
+    series: "Cadence",
+    ep: "EP 1 — Tempo Rubato",
+    genre: "Romance · Music",
+    dur: "0:44",
+  },
+  {
+    id: "t4",
+    src: "/tracks/t4.mp3",
+    cover: "/covers/s4-void-archive.jpg",
+    series: "The Void Archive",
+    ep: "EP 9 — The Door",
+    genre: "Sci-fi",
+    dur: "0:44",
+  },
+  {
+    id: "t5",
+    src: "/tracks/t5.mp3",
+    cover: "/covers/s5-last-call.jpg",
+    series: "Last Call",
+    ep: "EP 2 — Collect Three",
+    genre: "Thriller",
+    dur: "0:44",
+  },
+  {
+    id: "t6",
+    src: "/tracks/t6.mp3",
+    cover: "/covers/s6-embers-ash.jpg",
+    series: "Embers & Ash",
+    ep: "EP 7 — Rooftop Elegy",
+    genre: "Historical drama",
+    dur: "0:44",
+  },
 ];
 
 /* ================================================================
@@ -193,9 +257,15 @@ const GLYPHS: Record<string, ReactNode> = {
 function Cover({ s }: { s: (typeof SERIES)[number] }) {
   return (
     <div className="cover relative aspect-[4/5] overflow-hidden rounded-xl border border-white/5" style={{ background: s.bg }}>
-      {/* art layer — zooms on card hover */}
+      {/* real cover image — zooms on card hover */}
       <div className="cover-art absolute inset-0">
-        {/* accent glow */}
+        <img
+          src={s.image}
+          alt={`${s.title} cover art`}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+        {/* subtle accent glow for brand cohesion */}
         <div
           className="absolute inset-0"
           style={{
@@ -205,26 +275,15 @@ function Cover({ s }: { s: (typeof SERIES)[number] }) {
         />
         {/* hairline scan texture */}
         <div
-          className="absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0 opacity-[0.25]"
           style={{
             background:
               "repeating-linear-gradient(0deg, transparent 0 3px, rgba(244,237,220,0.03) 3px 4px)",
           }}
           aria-hidden="true"
         />
-        {/* ghost display letter */}
-        <span
-          className="pointer-events-none absolute -right-2 -top-6 select-none font-display text-[7rem] leading-none text-white/[0.07] md:text-[8rem]"
-          aria-hidden="true"
-        >
-          {s.letter}
-        </span>
-        {/* glyph */}
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="cover-glyph h-16 w-16 text-[var(--ink)]/85 md:h-20 md:w-20">
-            {GLYPHS[s.glyph]}
-          </div>
-        </div>
+        {/* legibility scrim */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/15" aria-hidden="true" />
       </div>
 
       {/* season tag */}
@@ -275,7 +334,7 @@ function Nav() {
         <div className="hidden items-center gap-8 text-sm text-[var(--dim)] md:flex">
           <a className="uline" href="#series">Series</a>
           <a className="uline" href="#genres">Genres</a>
-          <a className="uline" href="#listen">Player</a>
+          <a className="uline" href="#tracks">Tracks</a>
           <a className="uline" href="#voices">Voices</a>
         </div>
         <a href="#listen" className="btn btn-primary rounded-full px-5 py-2.5 text-sm font-semibold">
@@ -528,6 +587,29 @@ function Showcase() {
   );
 }
 
+function TracksSection() {
+  return (
+    <section id="tracks" className="relative mx-auto max-w-7xl px-5 pt-4 md:px-6 md:pt-10">
+      <Reveal className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <Kicker n="03b" tone="ember">
+            Fresh drops
+          </Kicker>
+          <h2 className="mt-4 font-display text-4xl uppercase leading-none tracking-tight md:text-6xl">
+            Press play. Any row.
+          </h2>
+        </div>
+        <span className="hidden font-mono text-xs uppercase tracking-[0.2em] text-[var(--dim)] md:block">
+          {TRACKS.length} episodes · real audio
+        </span>
+      </Reveal>
+      <Reveal delay={100} className="mt-10">
+        <Tracks tracks={TRACKS} />
+      </Reveal>
+    </section>
+  );
+}
+
 function Voices() {
   return (
     <section id="voices" className="border-t border-[var(--line)] bg-[var(--bg-2)] py-24 md:py-28">
@@ -682,6 +764,7 @@ export default function Home() {
       <Genres />
       <Stats />
       <Showcase />
+      <TracksSection />
       <Voices />
       <CTA />
       <Footer />
