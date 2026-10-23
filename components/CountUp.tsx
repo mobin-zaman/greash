@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** Counts up to `to` when scrolled into view. ease-out, ~1600ms. */
+/** Counts up to `to` when scrolled into view. ease-out cubic, ~1.6s. */
 export default function CountUp({
   to,
   suffix = "",
@@ -33,8 +33,7 @@ export default function CountUp({
       const dur = 1600;
       const tick = (now: number) => {
         const p = Math.min((now - t0) / dur, 1);
-        const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
-        setVal(to * eased);
+        setVal(to * (1 - Math.pow(1 - p, 3))); // ease-out cubic
         if (p < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
@@ -59,7 +58,10 @@ export default function CountUp({
   return (
     <span ref={ref}>
       {prefix}
-      {val.toFixed(decimals)}
+      {val.toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
       {suffix}
     </span>
   );

@@ -1,16 +1,16 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useRef, type MouseEvent, type ReactNode } from "react";
 
 /**
- * Emil-style magnetic tilt card. Transform tracked on the element
- * (GPU-safe), spring-ish via rAF lerp toward target rotation. --mx/--my
- * drive a translateZ buy popover-ish lift. Respects reduced motion.
+ * 3D tilt-on-mouse. Transform-only, no transition while tracking (feels 1:1),
+ * spring-back on leave via ease-out. Gated behind (hover:hover) +
+ * (pointer:fine) and fully disabled for reduced motion.
  */
 export default function TiltCard({
   children,
   className = "",
-  max = 8,
+  max = 7,
 }: {
   children: ReactNode;
   className?: string;
@@ -18,18 +18,24 @@ export default function TiltCard({
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  const onMove = (e: React.MouseEvent) => {
+  const canTilt = () =>
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const onMove = (e: MouseEvent<HTMLDivElement>) => {
     const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!el || !canTilt()) return;
     const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    el.style.transform = `perspective(900px) rotateX(${-py * max}deg) rotateY(${px * max}deg)`;
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transition = "none";
+    el.style.transform = `perspective(900px) rotateX(${-y * max}deg) rotateY(${x * max}deg)`;
   };
+
   const onLeave = () => {
     const el = ref.current;
     if (!el) return;
+    el.style.transition = "transform 420ms var(--ease-out)";
     el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
   };
 
@@ -39,7 +45,7 @@ export default function TiltCard({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className={`card-tilt ${className}`}
-      style={{ transition: "transform 240ms var(--ease-out)" }}
+      style={{ transformStyle: "preserve-3d", willChange: "transform" }}
     >
       {children}
     </div>

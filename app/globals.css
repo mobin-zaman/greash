@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-/* ============ Greash design tokens ============ */
+/* ================================================================
+   GREASH — design tokens
+   ================================================================ */
 :root {
   --bg: #0b0907;
   --bg-2: #100d0a;
@@ -13,18 +15,19 @@
   --ember: #ff5722;
   --line: rgba(244, 237, 220, 0.12);
 
-  /* Emil custom easings */
+  /* Emil Kowalski easings — never ease-in or ease for UI */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-bg2: var(--bg-2);
   --color-panel: var(--panel);
   --color-panel2: var(--panel-2);
   --color-ink: var(--ink);
   --color-dim: var(--dim);
+  --color-faint: var(--faint);
   --color-acid: var(--acid);
   --color-ember: var(--ember);
   --font-display: var(--font-anton);
@@ -34,6 +37,7 @@
 
 html {
   background: var(--bg);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -44,74 +48,87 @@ body {
   overflow-x: hidden;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
 ::selection {
   background: var(--acid);
   color: #0b0907;
 }
 
-/* ============ Grain overlay ============ */
+:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+section[id] {
+  scroll-margin-top: 96px;
+}
+
+/* ================================================================
+   Film grain — invisible refinement texture, never dirty
+   ================================================================ */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ============ Marquee ============ */
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee var(--marquee-speed, 30s) linear infinite;
-  will-change: transform;
-}
-.marquee:hover .marquee-track {
-  animation-play-state: paused;
-}
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-/* ============ Equalizer ============ */
-.eq {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 22px;
-}
-.eq span {
-  width: 3px;
-  border-radius: 99px;
-  background: var(--acid);
-  animation: eq 0.9s ease-in-out infinite alternate;
-}
-.eq-np span { background: currentColor; }
-.eq-np span:nth-child(1) { animation-delay: 0s; }
-.eq-np span:nth-child(2) { animation-delay: 0.22s; }
-.eq-np span:nth-child(3) { animation-delay: 0.4s; }
-.eq-np span:nth-child(4) { animation-delay: 0.15s; }
-@keyframes eq {
-  from { height: 20%; }
-  to   { height: 100%; }
-}
-
-/* ============ Reveal on scroll (IO-driven) ============ */
+/* ================================================================
+   Scroll reveal — opacity + translateY + scale(0.95), IO-advanced,
+   never IO-gated (1.2s mount fallback in Reveal.tsx)
+   ================================================================ */
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(22px) scale(0.95);
   transition:
-    opacity 700ms var(--ease-out),
-    transform 700ms var(--ease-out);
+    opacity 620ms var(--ease-out),
+    transform 620ms var(--ease-out);
   transition-delay: var(--d, 0ms);
 }
 .reveal.in {
   opacity: 1;
-  transform: none;
+  transform: translateY(0) scale(1);
 }
 
-/* ============ Rotating hero word ============ */
+/* ================================================================
+   Equalizer — transform-only (scaleY), interruptible play state
+   ================================================================ */
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+.eq > span {
+  width: 3px;
+  height: 100%;
+  border-radius: 99px;
+  background: currentColor;
+  transform: scaleY(0.25);
+  transform-origin: bottom;
+  animation: eq 900ms var(--ease-in-out) infinite alternate;
+}
+.eq > span:nth-child(1) { animation-delay: 0s; }
+.eq > span:nth-child(2) { animation-delay: 0.28s; }
+.eq > span:nth-child(3) { animation-delay: 0.12s; }
+.eq > span:nth-child(4) { animation-delay: 0.38s; }
+.eq > span:nth-child(5) { animation-delay: 0.2s; }
+.eq.eq-paused > span {
+  animation-play-state: paused;
+}
+@keyframes eq {
+  from { transform: scaleY(0.18); }
+  to   { transform: scaleY(1); }
+}
+
+/* ================================================================
+   Rotating hero word — constant motion, grid-stacked, width = max word
+   ================================================================ */
 .rotator {
   position: relative;
   display: inline-grid;
@@ -120,8 +137,9 @@ body {
 }
 .rotator > span {
   grid-area: 1 / 1;
-  animation: rotateWord 7s var(--ease-in-out) infinite;
+  white-space: nowrap;
   opacity: 0;
+  animation: rotateWord 7s var(--ease-in-out) infinite;
 }
 .rotator > span:nth-child(1) { animation-delay: 0s; }
 .rotator > span:nth-child(2) { animation-delay: 1.75s; }
@@ -129,127 +147,279 @@ body {
 .rotator > span:nth-child(4) { animation-delay: 5.25s; }
 @keyframes rotateWord {
   0%   { opacity: 0; transform: translateY(110%); }
-  5%   { opacity: 1; transform: translateY(0); }
-  22%  { opacity: 1; transform: translateY(0); }
-  27%  { opacity: 0; transform: translateY(-110%); }
+  6%   { opacity: 1; transform: translateY(0); }
+  24%  { opacity: 1; transform: translateY(0); }
+  30%  { opacity: 0; transform: translateY(-110%); }
   100% { opacity: 0; transform: translateY(-110%); }
 }
 
-/* ============ Big scroll type ============ */
-.slide-x {
-  animation: slideX var(--slide-ms, 28s) linear infinite;
+/* ================================================================
+   Marquee — linear infinite, duplicates content, pauses on hover
+   ================================================================ */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+          mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-speed, 30s) linear infinite;
   will-change: transform;
 }
-@keyframes slideX {
+@keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 
-/* ============ Buttons ============ */
+/* ================================================================
+   Buttons — solid brand fills, 0.97 press, 160ms ease-out
+   ================================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
-  transition:
-    transform 160ms var(--ease-out),
-    box-shadow 200ms var(--ease-out),
-    background 200ms var(--ease-out);
+  transition: transform 160ms var(--ease-out);
+  will-change: transform;
 }
-.btn:active { transform: scale(0.96); }
-.btn-primary { background: var(--acid); color: #0b0907; }
-.btn-primary:hover {
-  box-shadow: 0 0 0 2px rgba(216, 240, 74, 0.5), 0 12px 40px -8px rgba(216, 240, 74, 0.35);
-}
-.btn-ghost { border: 1px solid var(--line); color: var(--ink); }
-.btn-ghost:hover { background: rgba(244, 237, 220, 0.06); }
-.btn-ember { background: var(--ember); color: #0b0907; }
-.btn-ember:hover {
-  box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.45), 0 12px 40px -8px rgba(255, 87, 34, 0.35);
-}
+.btn:active { transform: scale(0.97); }
 
-/* ============ Featured cards ============ */
-.card-tilt { transform-style: preserve-3d; will-change: transform; }
-.card-tilt .lift { transform: translateZ(26px); }
-.cover-zoom img { transition: transform 700ms var(--ease-out); }
-.cover-zoom:hover img { transform: scale(1.07); }
-.series-card {
-  transition:
-    transform 260ms var(--ease-out),
-    box-shadow 260ms var(--ease-out);
-}
-.series-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.6);
-}
-
-/* ============ Genre rows ============ */
-.genre-row {
-  transition:
-    color 180ms var(--ease-out),
-    background 180ms var(--ease-out),
-    padding 180ms var(--ease-out);
-  -webkit-text-stroke: 1.5px var(--faint);
-  color: transparent;
-}
-.genre-row:hover {
-  color: var(--bg);
+.btn-primary {
   background: var(--acid);
-  -webkit-text-stroke: 0px;
-  padding-inline: 20px;
+  color: #0b0907;
+}
+.btn-ember {
+  background: var(--ember);
+  color: #0b0907;
+}
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: transparent;
 }
 
-/* ============ Links ============ */
-.uline {
-  background-image: linear-gradient(currentColor, currentColor);
-  background-size: 0% 1px;
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  transition: background-size 300ms var(--ease-out);
+/* Icon knob inside the primary button slides on hover */
+.btn .btn-icon {
+  transition: transform 200ms var(--ease-out);
 }
-.uline:hover { background-size: 100% 1px; }
 
-/* ============ Player ============ */
+/* ================================================================
+   Hover ambience — gated behind real hover-capable pointers only
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover { box-shadow: 0 12px 40px -10px rgba(216, 240, 74, 0.45); }
+  .btn-ember:hover   { box-shadow: 0 12px 40px -10px rgba(255, 87, 34, 0.45); }
+  .btn-ghost:hover   { background: rgba(244, 237, 220, 0.06); }
+  .btn-primary:hover .btn-icon,
+  .btn-ember:hover .btn-icon { transform: translateX(3px); }
+
+  .uline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 300ms var(--ease-out);
+  }
+  .uline:hover { background-size: 100% 1px; }
+
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+
+  /* Featured cards */
+  .series-card {
+    transition:
+      transform 260ms var(--ease-out),
+      box-shadow 260ms var(--ease-out);
+  }
+  .series-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.65);
+  }
+  .cover-art {
+    transition: transform 700ms var(--ease-out), opacity 400ms var(--ease-out);
+    will-change: transform;
+  }
+  .series-card:hover .cover-art { transform: scale(1.06); }
+  .cover-glyph {
+    transition: transform 600ms var(--ease-out), color 300ms var(--ease-out);
+  }
+  .series-card:hover .cover-glyph { transform: scale(1.08) rotate(-4deg); color: var(--acid); }
+
+  /* Quote cards */
+  .quote-card {
+    transition:
+      transform 260ms var(--ease-out),
+      border-color 260ms var(--ease-out),
+      box-shadow 260ms var(--ease-out);
+  }
+  .quote-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(216, 240, 74, 0.35);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Feature chips */
+  .chip {
+    transition:
+      transform 200ms var(--ease-out),
+      border-color 200ms var(--ease-out),
+      color 200ms var(--ease-out);
+  }
+  .chip:hover {
+    transform: translateY(-2px);
+    border-color: rgba(216, 240, 74, 0.4);
+    color: var(--ink);
+  }
+
+  /* Genre rows — background sweep + text fill + arrow slide */
+  .genre-row:hover::before { transform: scaleX(1); }
+  .genre-row:hover .genre-name {
+    color: var(--bg);
+    -webkit-text-stroke-color: var(--bg);
+    transform: translateX(14px);
+  }
+  .genre-row:hover .genre-meta { color: rgba(11, 9, 7, 0.75); }
+  .genre-row:hover .genre-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--bg);
+  }
+
+  /* Player skip buttons */
+  .skip-btn {
+    color: var(--dim);
+    transition: transform 160ms var(--ease-out), color 160ms var(--ease-out);
+  }
+  .skip-btn:hover { color: var(--acid); transform: scale(1.08); }
+}
+
+/* Touch devices: rows/cards still need an "I pressed this" moment */
+.genre-row:active .genre-name { transform: translateX(8px); }
+.chip:active { transform: scale(0.97); }
+
+/* ================================================================
+   Genre rows — outlined type filled by a transform sweep
+   ================================================================ */
+.genre-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  isolation: isolate;
+  padding-block: 1.35rem;
+}
+.genre-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--acid);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 280ms var(--ease-out);
+  z-index: -1;
+}
+.genre-name {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--faint);
+  transition:
+    color 200ms var(--ease-out),
+    -webkit-text-stroke-color 200ms var(--ease-out),
+    transform 280ms var(--ease-out);
+}
+.genre-meta {
+  transition: color 200ms var(--ease-out);
+}
+.genre-arrow {
+  opacity: 0;
+  transform: translateX(-14px);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 280ms var(--ease-out);
+}
+
+/* ================================================================
+   Player
+   ================================================================ */
 .player-progress {
   transform-origin: left;
-  animation: progress var(--progress-sec, 28s) linear infinite;
+  animation: progress var(--progress-sec, 36s) linear infinite;
 }
 @keyframes progress {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
 }
 
-/* breathing glow for CTA orb */
-.breathe { animation: breathe 4.5s ease-in-out infinite; }
+/* ================================================================
+   Ambient motion
+   ================================================================ */
+/* Slow-breathing CTA glow orb */
+.breathe {
+  animation: breathe 5.5s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
 @keyframes breathe {
-  0%, 100% { transform: scale(1); opacity: 0.55; }
-  50% { transform: scale(1.08); opacity: 0.95; }
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.09); opacity: 0.9; }
 }
 
-/* scroll cue */
-.cue-dot { animation: cueDrop 1.8s var(--ease-out) infinite; }
+/* Hero headline letters rise on entrance */
+.headline-line {
+  display: block;
+}
+
+/* Pulsing now-playing dot */
+.cue-dot { animation: cuePulse 1.8s var(--ease-in-out) infinite; }
+@keyframes cuePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(0.55); opacity: 0.45; }
+}
+
+/* Scrolldown hint in the hero */
+.scroll-cue { animation: cueDrop 1.9s var(--ease-in-out) infinite; }
 @keyframes cueDrop {
-  0%   { transform: translateY(0); opacity: 0; }
-  30%  { opacity: 1; }
-  75%  { transform: translateY(12px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 0; }
+  0%   { transform: translateY(-4px); opacity: 0; }
+  35%  { opacity: 1; }
+  80%  { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(10px); opacity: 0; }
 }
 
-/* ============ Reduced motion ============ */
+/* ================================================================
+   Reduced motion — no meaningful motion, everything still visible
+   ================================================================ */
 @media (prefers-reduced-motion: reduce) {
   .marquee-track,
-  .slide-x,
-  .eq span,
-  .rotator > span,
   .breathe,
   .cue-dot,
-  .player-progress {
-    animation-duration: 0.001s;
-    animation-iteration-count: 1;
+  .scroll-cue {
+    animation: none !important;
   }
+  .scroll-cue { opacity: 1; transform: none; }
+  .cue-dot { opacity: 1; transform: none; }
+
+  .eq > span {
+    animation: none !important;
+    transform: scaleY(0.45);
+  }
+  .eq.eq-paused > span { transform: scaleY(0.2); }
+
+  /* Show the first rotator word, freeze the rest */
+  .rotator > span {
+    animation: none !important;
+    opacity: 0;
+  }
+  .rotator > span:first-child { opacity: 1; }
+
+  /* Progress bar rests at a believable mid-point */
+  .player-progress { animation: none !important; transform: scaleX(0.52); }
+
   .reveal {
     opacity: 1;
     transform: none;
     transition: none;
   }
-  .series-card:hover { transform: none; }
+  .genre-row::before { transition: none; }
+  .series-card:hover,
+  .headline-line { transform: none; }
+  .genre-row:hover::before { transform: scaleX(1); }
 }
