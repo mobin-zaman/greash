@@ -1,0 +1,14 @@
+{
+  "projectId": "6fcd3afd-4067-4bfd-a9b3-2937ba018413",
+  "type": "frontend",
+  "name": "Featured series grid shows cover images and metadata",
+  "description": "The Trending right now section renders a grid of six series cards, each with an actual cover image, a title, and genre/series metadata — none missing or broken.",
+  "priority": "p0",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the homepage" },
+    { "type": "action", "description": "Scroll to the section headed Trending right now" },
+    { "type": "assertion", "description": "The section shows six series cards: Static Shores, Neon Requiem, Cadence, The Void Archive, Last Call, and Embers and Ash" },
+    { "type": "assertion", "description": "Each of the six cards displays an actual photo-like cover image (not a blank or broken image) along with its title, and a genre plus an episode count such as 94 eps" },
+    { "type": "assertion", "description": "Each card shows a star rating, and hovering over or moving the mouse across a card makes it tilt in 3D on the cover" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "projectId": "6fcd3afd-4067-4bfd-a9b3-2937ba018413",
+  "type": "frontend",
+  "name": "Episode tracks list plays real audio",
+  "description": "The Press play. Any row. section lists six episode tracks with play controls, and pressing a row's play button actually starts audio playback for that episode.",
+  "priority": "p0",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the homepage" },
+    { "type": "action", "description": "Scroll to the section headed Press play. Any row." },
+    { "type": "assertion", "description": "A vertical list of six episode rows is visible, one per series, each showing a cover thumbnail, an episode title like EP 12 and a play button" },
+    { "type": "action", "description": "Press the play button on the first episode row (Static Shores)" },
+    { "type": "assertion", "description": "The first episode row switches from a play icon to a live animated equalizer bars indicator, indicating the audio track started playing" },
+    { "type": "action", "description": "Press the play button again on the same row" },
+    { "type": "assertion", "description": "The row returns to the paused play icon state, indicating playback stopped" }
+  ]
+}

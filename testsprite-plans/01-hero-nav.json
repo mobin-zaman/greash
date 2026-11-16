@@ -1,0 +1,14 @@
+{
+  "projectId": "6fcd3afd-4067-4bfd-a9b3-2937ba018413",
+  "type": "frontend",
+  "name": "Hero renders and navigation and CTA work",
+  "description": "The GREASH homepage hero shows a big headline with a rotating word and an animated equalizer pip, and the Listen free CTA scrolls to the working audio player section.",
+  "priority": "p0",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the homepage" },
+    { "type": "assertion", "description": "A large display headline is visible whose first line reads Stories that (or very close to it), with a highlighted word that cycles between HEAR IT, FEEL IT, LIVE IT and LOSE IT over time" },
+    { "type": "assertion", "description": "A small animated equalizer bars indicator appears in the tagline above the headline, indicating a live audio station" },
+    { "type": "action", "description": "Click the Listen free button in the top navigation bar" },
+    { "type": "assertion", "description": "The page scrolls to the audio player section headed One tap and the room disappears, which shows a play/pause control" }
+  ]
+}
